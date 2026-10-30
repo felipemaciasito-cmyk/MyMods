@@ -16,6 +16,8 @@ Sur l'app desktop, VS Code et l'app mobile, le panneau est dessiné en deux cart
 - **Parcours du plan** : le nom de la tâche, « Étape 3 / 5 », une barre de progression, les étapes sur un chemin qui s'allume au fil du plan, l'étape en cours mise en avant avec ce que Claude y fait, et « Plan bouclé » à la fin.
 - **Météo du contexte** : le ciel dessiné (soleil, nuages, pluie, orage, tornade), le pourcentage, les jetons, une jauge avec le trait rouge à 75 % (le moment de compacter) et la tendance des dernières mesures.
 
+La base est sobre (graphite, gris neutres) et la couleur dit l’état : la météo passe du vert au jaune, à l’orange puis au rouge à mesure que le contexte se remplit ; dans le plan, le bleu marque l’étape en cours et le vert ce qui est fait, jusqu’à « Plan bouclé ».
+
 Dans le terminal, le panneau reste en texte.
 
 La commande `/plan-meteo` rouvre le panneau. Là où l'app n'affiche pas de panneau (l'app mobile), `/plan-meteo` dessine les deux cartes directement dans la conversation, et elles se mettent à jour d'elles-mêmes.
