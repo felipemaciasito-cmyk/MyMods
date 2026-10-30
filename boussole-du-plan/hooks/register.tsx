@@ -55,9 +55,27 @@ export const register: Register = on => {
   })
 
   on('command.run', { command: 'plan-meteo' }, async $ => {
-    await $.ui.open({ id: PANE, title: TITLE })
+    const opened = await $.ui.open({ id: PANE, title: TITLE })
 
-    return { text: 'Panneau « Plan & météo » ouvert.' }
+    if (opened.isPlaced) return { text: 'Panneau « Plan & météo » ouvert.' }
+
+    // No surface draws the pane here: answer with the same news as text.
+    const list = await read($, steps)
+    const fill: ContextFill = await read($, context)
+    const percent = fill.percent
+    const weather =
+      percent === undefined ? undefined : WEATHER.find(w => percent < w.upTo)
+    const plan =
+      list.length === 0
+        ? 'Pas encore de plan pour cette tâche.'
+        : list.map((step, i) => `${MARK[step.status]} ${i + 1}. ${step.label}`).join('\n')
+    const sky =
+      weather === undefined || percent === undefined
+        ? 'En attente de la première réponse…'
+        : `${weather.icon} ${weather.label} · ${percent}% ${gauge(percent, 20)}\n` +
+          `${kilo(fill.tokens ?? 0)} / ${kilo(fill.window)} tokens · ${weather.note}`
+
+    return { text: `🧭 Plan\n${plan}\n\nMétéo du contexte\n${sky}` }
   })
 
   on('session.measure', async ($, e, next) => {
