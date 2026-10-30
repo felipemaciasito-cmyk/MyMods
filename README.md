@@ -43,3 +43,36 @@ claude plugin install boussole-du-plan --marketplace felipemaciasito-cmyk/MyMods
 ```
 
 Dans l'app desktop : cliquer sur + à côté de la zone de saisie, puis Plugins, Add marketplace avec `felipemaciasito-cmyk/MyMods`, puis Add plugin.
+
+## plan-ascii
+
+Le plan et la fenêtre de contexte dessinés uniquement avec des caractères, pour l'app iOS où rien de graphique ne s'affiche.
+
+Par défaut, c'est **Pégase** : un cheval ailé en art ASCII qui se colore de gauche à droite, du vert au rose, à mesure que le plan avance. En dessous :
+
+- **Où on en est dans le plan** : « ETAPE 3 / 5 », la liste des étapes (`[x]` faite, `[>]` en cours avec ce que Claude y fait, `[ ]` à venir).
+- **Le souffle du contexte** : une jauge `}====>` dans le même dégradé, qui s'allonge à mesure que la fenêtre de contexte se remplit, avec le trait `|` à 75 % (le moment de compacter), la météo (Grand soleil → Tempête) et les jetons utilisés.
+
+```
+>> ETAPE 3 / 5
+[x] 1. Lire le mod existant
+[x] 2. Dessiner les styles retro
+[>] 3. Tester sur l iPad         <--
+[ ] 4. Choisir le style
+
+~~ SOUFFLE DU CONTEXTE ~~
+}====================>   |       =-
+Nuageux 63 % . 630k / 1000k jetons
+```
+
+Commandes :
+
+- `/plan-ascii` ouvre le panneau (ou, sur l'app mobile, dessine Pégase dans la conversation et le tient à jour).
+- `/plan-ascii demo` montre un plan d'exemple ; le bouton **Plan reel** revient au vrai plan.
+- `/plan-ascii 1` à `5` : les autres styles (1 Console, 3 Démon, 4 Matrice, 5 Tour) ; `/plan-ascii 2` revient à Pégase.
+
+### Installation
+
+```
+/plugin install plan-ascii --marketplace felipemaciasito-cmyk/MyMods
+```
