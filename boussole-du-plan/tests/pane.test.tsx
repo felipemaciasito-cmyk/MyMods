@@ -68,7 +68,8 @@ test('sur mobile, /plan-meteo dessine les cartes dans sa sortie', async ($, on) 
     origin: { kind: 'composer' },
     presentation: { isFullscreen: false, columns: 80 },
   })
-  expect(ran.text).toContain('▶ 2. Écrire le mod')
+  expect(ran.text).toContain('🔵 **2. Écrire le mod**')
+  expect(ran.text).toContain('🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨🟨🟨│🟧⬛⬛⬛⬛')
 
   const row = await $.ui.mount({
     plugin: 'boussole-du-plan',

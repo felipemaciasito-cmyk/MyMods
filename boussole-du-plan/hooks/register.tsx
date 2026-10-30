@@ -2,7 +2,7 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
 import type { ContextFill, Step, StepStatus } from '../types'
-import { CARD_WIDTH, COMPACT_AT, planCard, weatherCard, weatherOf } from './cards'
+import { CARD_WIDTH, COMPACT_AT, WEATHER, planCard, weatherCard, weatherOf } from './cards'
 
 const PANE = 'boussole-du-plan'
 const TITLE = 'Plan & météo'
@@ -25,6 +25,68 @@ const MARK: Record<StepStatus, string> = {
 }
 
 const kilo = (n: number) => `${Math.round(n / 1000)}k`
+
+// The cards' colour code in emoji, for where only text shows: one square per
+// weather, from green to red.
+const SQUARE = ['🟩', '🟩', '🟨', '🟧', '🟥', '🟥'] as const
+const square = (percent: number) => SQUARE[WEATHER.findIndex(w => percent < w.upTo)] ?? '🟥'
+const SPARK = '▁▂▃▄▅▆▇█'
+
+// The gauge as twenty squares, each filled one in the colour of its level,
+// with a bar where the context should be compacted.
+const colourGauge = (percent: number) =>
+  Array.from({ length: 20 }, (_, i) => {
+    const cell = (percent / 100) * 20 > i ? square(i * 5 + 2.5) : '⬛'
+
+    return i * 5 === COMPACT_AT ? `│${cell}` : cell
+  }).join('')
+
+// The plan and the weather as markdown, the same news as the cards.
+const report = (list: readonly Step[], fill: ContextFill, title: string | undefined) => {
+  const done = list.filter(one => one.status === 'completed').length
+  const current = list.findIndex(one => one.status === 'in_progress')
+  const isDone = list.length > 0 && done === list.length
+  const where = isDone ? '✅ Terminé' : current >= 0 ? `Étape ${current + 1} / ${list.length}` : `${done} / ${list.length}`
+  const plan =
+    list.length === 0
+      ? ['### 🧭 Parcours du plan', '', '_Pas de plan en cours : il s’affiche dès que Claude découpe la tâche en étapes._']
+      : [
+          `### 🧭 Parcours du plan · ${where}`,
+          '',
+          `**${title ?? 'Plan de la tâche'}**`,
+          '',
+          `${list.map(one => (one.status === 'completed' ? (isDone ? '🟩' : '🟦') : '⬜')).join('')}  ${done} / ${list.length} faites`,
+          '',
+          ...list.map((step, i) =>
+            step.status === 'completed'
+              ? `- ✅ ${step.label}`
+              : step.status === 'in_progress'
+                ? `- 🔵 **${i + 1}. ${step.label}**` + (step.detail !== undefined && step.detail !== step.label ? `  \n  _${step.detail}_` : '')
+                : `- ⚪ ${i + 1}. ${step.label}`,
+          ),
+          ...(isDone ? ['', '**🎉 Plan bouclé**'] : []),
+        ]
+
+  const percent = fill.percent
+  const weather = weatherOf(percent)
+  const sky =
+    weather === undefined || percent === undefined
+      ? ['### 🌡️ Météo du contexte', '', '_En attente de la première réponse…_']
+      : [
+          `### ${weather.icon} Météo du contexte · ${square(percent)} ${weather.label}`,
+          '',
+          `**${percent} %** · ${kilo(fill.tokens ?? 0)} / ${kilo(fill.window)} jetons · _${weather.note}_`,
+          '',
+          colourGauge(percent),
+          '',
+          ...((fill.history ?? []).length > 1
+            ? [`Tendance  ${(fill.history ?? []).map(one => `${SPARK[Math.min(7, Math.floor(one / 12.5))]}`).join('')}`, '']
+            : []),
+          `_│ = ${COMPACT_AT} %, le bon moment pour compacter_`,
+        ]
+
+  return [...plan, '', '---', '', ...sky].join('\n')
+}
 
 const gauge = (percent: number, width: number) => {
   const full = Math.round((Math.min(100, percent) / 100) * width)
@@ -90,22 +152,17 @@ export const register: Register = on => {
     if (opened.isPlaced) return { text: 'Panneau « Plan & météo » ouvert.' }
 
     // No pane here (the mobile app): the cards draw in this row where the
-    // surface draws SVG, and this text is what the others, and the model, read.
-    const list = await read($, steps)
-    const fill: ContextFill = await read($, context)
-    const percent = fill.percent
-    const weather = weatherOf(percent)
-    const plan =
-      list.length === 0
-        ? 'Pas encore de plan pour cette tâche.'
-        : list.map((step, i) => `${MARK[step.status]} ${i + 1}. ${step.label}`).join('\n')
-    const sky =
-      weather === undefined || percent === undefined
-        ? 'En attente de la première réponse…'
-        : `${weather.icon} ${weather.label} · ${percent}% ${gauge(percent, 20)}\n` +
-          `${kilo(fill.tokens ?? 0)} / ${kilo(fill.window)} tokens · ${weather.note}`
+    // surface draws SVG; elsewhere this markdown is what shows, and what the
+    // model reads.
+    let fill: ContextFill = await read($, context)
+    if (fill.percent === undefined) {
+      const usage = await $.session.usage()
+      await measure($, usage.context)
+      fill = await read($, context)
+    }
+    const { title } = await read($, topic)
 
-    return { text: `🧭 Plan\n${plan}\n\nMétéo du contexte\n${sky}` }
+    return { text: report(await read($, steps), fill, title) }
   })
 
   on('session.measure', async ($, e, next) => {
