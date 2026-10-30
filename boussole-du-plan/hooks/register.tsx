@@ -1,5 +1,5 @@
 import { atom, read, update } from 'claude-code'
-import type { Register } from 'claude-code'
+import type { EngineInterface, Register } from 'claude-code'
 
 import type { ContextFill, Step, StepStatus } from '../types'
 
@@ -40,6 +40,16 @@ const gauge = (percent: number, width: number) => {
   return '█'.repeat(full) + '░'.repeat(width - full)
 }
 
+// The weather as one short line beside the prompt, redrawn on each measure.
+const showWeather = ($: EngineInterface, fill: ContextFill) => {
+  const percent = fill.percent
+  const weather =
+    percent === undefined ? undefined : WEATHER.find(w => percent < w.upTo)
+  $.ui.status(
+    weather === undefined ? undefined : `${weather.icon} ${percent}% · ${weather.label}`,
+  )
+}
+
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await $.command.register({
@@ -50,6 +60,7 @@ export const register: Register = on => {
     const ran = await next(e)
     const usage = await $.session.usage()
     await update($, context, () => usage.context)
+    showWeather($, usage.context)
 
     return ran
   })
@@ -82,6 +93,7 @@ export const register: Register = on => {
     if (e.changed.includes('context')) {
       const { percent, tokens, window } = e.context
       await update($, context, () => ({ percent, tokens, window }))
+      showWeather($, { percent, tokens, window })
     }
 
     return next(e)
