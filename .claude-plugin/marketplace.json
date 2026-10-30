@@ -1,0 +1,5 @@
+{
+  "name": "mymods",
+  "owner": { "name": "felipemaciasito-cmyk" },
+  "plugins": [{ "name": "boussole-du-plan", "source": "./boussole-du-plan" }]
+}

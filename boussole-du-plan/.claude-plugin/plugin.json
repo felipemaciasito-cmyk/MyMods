@@ -1,0 +1,6 @@
+{
+  "name": "boussole-du-plan",
+  "version": "0.1.0",
+  "description": "Panneau latéral : l'étape du plan en cours et la météo de la fenêtre de contexte",
+  "types": "./types/index.d.ts"
+}
