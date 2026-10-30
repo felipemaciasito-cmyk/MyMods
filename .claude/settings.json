@@ -1,0 +1,10 @@
+{
+  "extraKnownMarketplaces": {
+    "mymods": {
+      "source": { "source": "github", "repo": "felipemaciasito-cmyk/MyMods" }
+    }
+  },
+  "enabledPlugins": {
+    "boussole-du-plan@mymods": true
+  }
+}
