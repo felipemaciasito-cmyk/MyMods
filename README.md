@@ -11,6 +11,10 @@ Un panneau latéral « Plan & météo » qui montre :
 
 La commande `/plan-meteo` rouvre le panneau.
 
+Une ligne courte à côté de la zone de saisie (par exemple `☀️ 9% · Grand soleil`) donne aussi la météo du contexte et se met à jour après chaque réponse de Claude.
+
+Quand l'app ne peut pas afficher de panneau (aucune app connectée à la session, ou une app qui n'affiche pas les panneaux), `/plan-meteo` répond avec le plan et la météo sous forme de texte.
+
 ### Installation
 
 À l'invite d'une session Claude Code dans un terminal :
