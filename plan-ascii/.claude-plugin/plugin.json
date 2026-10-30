@@ -1,6 +1,0 @@
-{
-  "name": "plan-ascii",
-  "version": "0.1.0",
-  "description": "Panneau en art ASCII : un pégase qui s'allume au fil du plan et, en dessous, le souffle de la fenêtre de contexte",
-  "types": "./types/index.d.ts"
-}

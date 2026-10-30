@@ -6,9 +6,5 @@
         "repo": "felipemaciasito-cmyk/MyMods"
       }
     }
-  },
-  "enabledPlugins": {
-    "boussole-du-plan@mymods": true,
-    "plan-ascii@mymods": true
   }
 }
